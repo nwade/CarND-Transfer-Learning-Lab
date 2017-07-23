@@ -3,3 +3,4 @@ models
 .ipynb_checkpoints
 bottlenecks
 .idea
+vgg-100
