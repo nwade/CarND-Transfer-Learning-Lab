@@ -4,3 +4,5 @@ models
 bottlenecks
 .idea
 vgg-100
+resnet-100
+inception-100
