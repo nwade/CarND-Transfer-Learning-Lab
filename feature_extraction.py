@@ -1,13 +1,16 @@
+import numpy as np
 import pickle
 import tensorflow as tf
-# TODO: import Keras layers you need here
+from keras.layers import Input, Flatten, Dense
+from keras.models import Model
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
 
-# command line flags
 flags.DEFINE_string('training_file', '', "Bottleneck features training file (.p)")
 flags.DEFINE_string('validation_file', '', "Bottleneck features validation file (.p)")
+flags.DEFINE_integer('epochs', 50, 'The number of epochs')
+flags.DEFINE_integer('batch_size', 256, 'The batch size')
 
 
 def load_bottleneck_data(training_file, validation_file):
@@ -35,19 +38,26 @@ def load_bottleneck_data(training_file, validation_file):
 
 
 def main(_):
-    # load bottleneck data
     X_train, y_train, X_val, y_val = load_bottleneck_data(FLAGS.training_file, FLAGS.validation_file)
 
+    print('Training data shape:')
     print(X_train.shape, y_train.shape)
+    print('Validation data shape')
     print(X_val.shape, y_val.shape)
 
-    # TODO: define your model and hyperparams here
-    # make sure to adjust the number of classes based on
-    # the dataset
-    # 10 for cifar10
-    # 43 for traffic
+    num_classes = len(np.unique(y_train))
 
-    # TODO: train your model here
+    input_shape = X_train.shape[1:]
+    inp = Input(shape=input_shape)
+
+    x = Flatten()(inp)
+    x = Dense(num_classes, activation='softmax')(x)
+
+    model = Model(inp, x)
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+    model.fit(X_train, y_train, epochs=FLAGS.epochs, batch_size=FLAGS.batch_size, validation_data=(X_val, y_val),
+              shuffle=True)
 
 
 # parses flags and calls the `main` function above
